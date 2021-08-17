@@ -68,3 +68,24 @@ func FastWrite(destination []byte, destinationOffset int, word uint, size int) {
 		destination[destinationOffset] = byte(word)
 	}
 }
+
+const (
+	MaxUint = ^uint(0)
+	MinUint = 0
+	MaxInt  = int(MaxUint >> 1)
+	MinInt  = -MaxInt - 1
+)
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
