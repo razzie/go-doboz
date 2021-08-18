@@ -41,14 +41,14 @@ func getSizeCodedSize(size int) int {
 // The source and destination buffers must not overlap and their size must be greater than 0
 // This operation is memory safe
 // On success, returns RESULT_OK and outputs the compressed size
-func (c *Compressor) Compress(source []byte, destination []byte, compressedSize *int) Result {
+func (c *Compressor) Compress(source []byte, destination []byte) (Result, int) {
 	if len(source) == 0 {
-		return RESULT_ERROR_BUFFER_TOO_SMALL
+		return RESULT_ERROR_BUFFER_TOO_SMALL, 0
 	}
 
 	maxCompressedSize := GetMaxCompressedSize(len(source))
 	if len(destination) < maxCompressedSize {
-		return RESULT_ERROR_BUFFER_TOO_SMALL
+		return RESULT_ERROR_BUFFER_TOO_SMALL, 0
 	}
 
 	inputBuffer := source
@@ -100,7 +100,7 @@ func (c *Compressor) Compress(source []byte, destination []byte, compressedSize 
 		// During each iteration, we may output up to 8 bytes (2 words), and the compressed stream ends with 4 dummy bytes
 		if outputIterator+2*WORD_SIZE+TRAILING_DUMMY_SIZE > maxOutputEnd {
 			// Stop the compression and instead store
-			return c.store(source, destination, compressedSize)
+			return c.store(source, destination)
 		}
 
 		// Check whether the control word must be flushed
@@ -166,23 +166,23 @@ func (c *Compressor) Compress(source []byte, destination []byte, compressedSize 
 	outputIterator += TRAILING_DUMMY_SIZE
 
 	// Done, compute the compressed size
-	*compressedSize = outputIterator
+	compressedSize := outputIterator
 
 	// Encode the header
 	var header Header
 	header.Version = VERSION
 	header.IsStored = false
 	header.UncompressedSize = uint64(len(source))
-	header.CompressedSize = uint64(*compressedSize)
+	header.CompressedSize = uint64(compressedSize)
 
 	c.encodeHeader(header, maxCompressedSize, outputBuffer)
 
 	// Return the compressed size
-	return RESULT_OK
+	return RESULT_OK, compressedSize
 }
 
 // Store the source
-func (c *Compressor) store(source []byte, destination []byte, compressedSize *int) Result {
+func (c *Compressor) store(source []byte, destination []byte) (Result, int) {
 	outputBuffer := destination
 	outputIterator := 0
 
@@ -190,13 +190,13 @@ func (c *Compressor) store(source []byte, destination []byte, compressedSize *in
 	maxCompressedSize := GetMaxCompressedSize(len(source))
 	headerSize := getHeaderSize(maxCompressedSize)
 
-	*compressedSize = headerSize + len(source)
+	compressedSize := headerSize + len(source)
 
 	var header Header
 	header.Version = VERSION
 	header.IsStored = true
 	header.UncompressedSize = uint64(len(source))
-	header.CompressedSize = uint64(*compressedSize)
+	header.CompressedSize = uint64(compressedSize)
 
 	c.encodeHeader(header, maxCompressedSize, destination)
 	outputIterator += headerSize
@@ -204,7 +204,7 @@ func (c *Compressor) store(source []byte, destination []byte, compressedSize *in
 	// Store the data
 	copy(outputBuffer[outputIterator:], source)
 
-	return RESULT_OK
+	return RESULT_OK, compressedSize
 }
 
 func (c *Compressor) getBestMatch(matchCandidates []Match) (bestMatch Match) {
