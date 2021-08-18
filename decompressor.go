@@ -40,6 +40,8 @@ func (d *Decompressor) initialize() {
 // This operation is memory safe
 // On success, returns RESULT_OK
 func (d *Decompressor) Decompress(source []byte, destination []byte) Result {
+	d.initialize()
+
 	inputBuffer := source
 	inputIterator := 0
 
