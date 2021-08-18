@@ -89,3 +89,15 @@ func max(a, b int) int {
 	}
 	return b
 }
+
+func Hash(data []byte, pos int) uint {
+	// FNV-1a hash
+	const prime uint = 16777619
+	var result uint = 2166136261
+
+	result = (result ^ uint(data[pos+0])) * prime
+	result = (result ^ uint(data[pos+1])) * prime
+	result = (result ^ uint(data[pos+2])) * prime
+
+	return result
+}

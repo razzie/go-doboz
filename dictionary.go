@@ -75,7 +75,7 @@ func (d *Dictionary) FindMatches(matchCandidates []Match) int {
 	}
 
 	// Compute the hash value for the current string
-	hashValue := d.hash(d.buffer, d.bufferBase+position) % HASH_TABLE_SIZE
+	hashValue := Hash(d.buffer, d.bufferBase+position) % HASH_TABLE_SIZE
 
 	// Get the position of the first match from the hash table
 	matchPosition := d.hashTable[hashValue]
@@ -232,16 +232,4 @@ func (d *Dictionary) computeRelativePosition() int {
 	}
 
 	return position
-}
-
-func (d *Dictionary) hash(data []byte, pos int) uint {
-	// FNV-1a hash
-	const prime uint = 16777619
-	var result uint = 2166136261
-
-	result = (result ^ uint(data[pos+0])) * prime
-	result = (result ^ uint(data[pos+1])) * prime
-	result = (result ^ uint(data[pos+2])) * prime
-
-	return result
 }
