@@ -39,16 +39,16 @@ const (
 
 // Reads up to 4 bytes and returns them in a word
 // WARNING: May read more bytes than requested!
-func FastRead(source []byte, sourceOffset int, size int) uint {
+func FastRead(source []byte, size int) uint {
 	switch size {
 	case 4:
-		return uint(binary.LittleEndian.Uint32(source[sourceOffset:]))
+		return uint(binary.LittleEndian.Uint32(source))
 	case 3:
-		return uint(binary.LittleEndian.Uint32(source[sourceOffset:]))
+		return uint(binary.LittleEndian.Uint32(source))
 	case 2:
-		return uint(binary.LittleEndian.Uint16(source[sourceOffset:]))
+		return uint(binary.LittleEndian.Uint16(source))
 	case 1:
-		return uint(source[sourceOffset])
+		return uint(source[0])
 	default:
 		return 0
 	}
@@ -56,16 +56,16 @@ func FastRead(source []byte, sourceOffset int, size int) uint {
 
 // Writes up to 4 bytes specified in a word
 // WARNING: May write more bytes than requested!
-func FastWrite(destination []byte, destinationOffset int, word uint, size int) {
+func FastWrite(destination []byte, word uint, size int) {
 	switch size {
 	case 4:
-		binary.LittleEndian.PutUint32(destination[destinationOffset:destinationOffset+4], uint32(word))
+		binary.LittleEndian.PutUint32(destination, uint32(word))
 	case 3:
-		binary.LittleEndian.PutUint32(destination[destinationOffset:destinationOffset+4], uint32(word))
+		binary.LittleEndian.PutUint32(destination, uint32(word))
 	case 2:
-		binary.LittleEndian.PutUint16(destination[destinationOffset:destinationOffset+4], uint16(word))
+		binary.LittleEndian.PutUint16(destination, uint16(word))
 	case 1:
-		destination[destinationOffset] = byte(word)
+		destination[0] = byte(word)
 	}
 }
 
